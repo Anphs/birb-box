@@ -45,6 +45,7 @@ function createBirbContainer(): ParticleContainer {
       color: false,
     },
     boundsArea: new Rectangle(0, 0, config.worldWidth, config.worldHeight),
+    cullArea: new Rectangle(0, 0, config.worldWidth, config.worldHeight),
   });
 }
 
@@ -64,19 +65,27 @@ function createBirbs(birbTexture: Texture): Particle[] {
   return birbs;
 }
 
-function wrapCoord(coord: number, bound: number): number {
-  return ((coord % bound) + bound) % bound;
-}
-
 function updateBirbs(birbs: Particle[], deltaTime: number): void {
+  const distance: number = config.birbSpeed * deltaTime;
+  const angleOffset: number = -Math.PI / 2;
+
   for (const birb of birbs) {
-    const distance = config.birbSpeed * deltaTime;
+    const rotation: number = birb.rotation + angleOffset;
 
-    const dx = distance * Math.cos(birb.rotation - Math.PI / 2);
-    const dy = distance * Math.sin(birb.rotation - Math.PI / 2);
+    const dx: number = distance * Math.cos(rotation);
+    const dy: number = distance * Math.sin(rotation);
 
-    birb.x = wrapCoord(birb.x + dx, config.worldWidth);
-    birb.y = wrapCoord(birb.y + dy, config.worldHeight);
+    let x: number = birb.x + dx;
+    let y: number = birb.y + dy;
+
+    if (x < 0) x += config.worldWidth;
+    else if (x >= config.worldWidth) x -= config.worldWidth;
+
+    if (y < 0) y += config.worldHeight;
+    else if (y >= config.worldHeight) y -= config.worldHeight;
+
+    birb.x = x;
+    birb.y = y;
   }
 }
 
@@ -98,7 +107,6 @@ async function init(): Promise<void> {
   birbScene.addChild(birbContainer);
 
   app.ticker.add(({ deltaTime }) => {
-    // console.log("Delta", delta);
     updateBirbs(birbs, deltaTime);
   });
 }
