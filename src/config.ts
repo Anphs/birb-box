@@ -2,8 +2,8 @@ export const config = {
   worldWidth: 10240,
   worldHeight: 10240,
 
-  maxBirbs: 1,
-  birbSpeed: 1,
+  maxBirbs: 10,
+  birbSpeed: 2,
 };
 
 export const camera = {
