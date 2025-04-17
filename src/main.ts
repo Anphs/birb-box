@@ -52,7 +52,7 @@ function createBirbContainer(): ParticleContainer {
 function createBirbs(birbTexture: Texture): Birb[] {
   const birbs: Birb[] = [];
   for (let i = 0; i < config.maxBirbs; i++) {
-    const birb = new Birb({
+    const birb = new Birb(i, {
       texture: birbTexture,
       x: Math.random() * config.worldWidth,
       y: Math.random() * config.worldHeight,
@@ -99,9 +99,9 @@ function updateBirbs(birbs: Birb[], deltaTime: number): void {
     let neighborCount = 0;
 
     for (let j = 0; j < birbs.length; j++) {
-      if (i === j) continue;
-
       const other = birbs[j];
+      if (birb.id === other.id) continue;
+
       const dx = other.x - birb.x;
       const dy = other.y - birb.y;
       const distSq = dx * dx + dy * dy;
