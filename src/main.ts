@@ -179,11 +179,7 @@ function updateBirbs(grid: Grid, birbs: Birb[], deltaTime: number): void {
     else if (birb.y >= config.worldHeight) birb.y -= config.worldHeight;
 
     // Update grid
-    const { cellX, cellY } = grid.getCellCoordinates(birb.x, birb.y);
-    if (cellX !== birb.cachedCellX || cellY !== birb.cachedCellY) {
-      grid.remove(birb);
-      grid.insert(birb);
-    }
+    grid.update(birb);
   }
 }
 

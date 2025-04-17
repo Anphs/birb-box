@@ -18,6 +18,8 @@ export class Grid {
   private rows: number;
   /** The number of columns in the grid. */
   private cols: number;
+  /** The cell offsets for cells containing potential neighbors. */
+  private neighborOffsets: { dx: number; dy: number }[];
 
   constructor(cellSize: number, gridWidth: number, gridHeight: number) {
     this.cellSize = cellSize;
@@ -26,6 +28,17 @@ export class Grid {
     this.rows = Math.ceil(this.gridWidth / this.cellSize);
     this.cols = Math.ceil(this.gridHeight / this.cellSize);
     this.cells = this.createEmptyGrid();
+    this.neighborOffsets = [
+      { dx: -1, dy: -1 },
+      { dx: 0, dy: -1 },
+      { dx: 1, dy: -1 },
+      { dx: -1, dy: 0 },
+      { dx: 0, dy: 0 },
+      { dx: 1, dy: 0 },
+      { dx: -1, dy: 1 },
+      { dx: 0, dy: 1 },
+      { dx: 1, dy: 1 },
+    ];
   }
 
   private createEmptyGrid(): GridCell[][] {
@@ -62,22 +75,42 @@ export class Grid {
     cell.birbs.splice(index, 1);
   }
 
+  /** Updates a birb's grid cell if it crossed into a new one. */
+  update(birb: Birb): void {
+    const cellX = Math.floor(birb.x / this.cellSize);
+    const cellY = Math.floor(birb.y / this.cellSize);
+    if (cellX !== birb.cachedCellX || cellY !== birb.cachedCellY) {
+      const cell = this.cells[birb.cachedCellY][birb.cachedCellX];
+      const index = cell.birbs.indexOf(birb);
+      cell.birbs.splice(index, 1);
+
+      this.cells[cellY][cellX].birbs.push(birb);
+
+      birb.cachedCellX = cellX;
+      birb.cachedCellY = cellY;
+    }
+  }
+
   /** Updates a birb's potential neighbors */
   updatePotentialNeighbors(birb: Birb): void {
+    const cols = this.cols;
+    const rows = this.rows;
+
     birb.clearPotentialNeighbors();
 
-    for (let dy = -1; dy <= 1; dy++) {
-      for (let dx = -1; dx <= 1; dx++) {
-        let cellX = birb.cachedCellX + dx;
-        let cellY = birb.cachedCellY + dy;
+    for (const { dx, dy } of this.neighborOffsets) {
+      let cellX = birb.cachedCellX + dx;
+      let cellY = birb.cachedCellY + dy;
 
-        if (cellX < 0) cellX += this.cols;
-        else if (cellX >= this.cols) cellX -= this.cols;
+      if (cellX < 0) cellX += cols;
+      else if (cellX >= cols) cellX -= cols;
 
-        if (cellY < 0) cellY += this.rows;
-        else if (cellY >= this.rows) cellY -= this.rows;
+      if (cellY < 0) cellY += rows;
+      else if (cellY >= rows) cellY -= rows;
 
-        birb.potentialNeighbors.push(...this.cells[cellY][cellX].birbs);
+      const cellBirbs = this.cells[cellY][cellX].birbs;
+      for (let i = 0; i < cellBirbs.length; i++) {
+        birb.potentialNeighbors.push(cellBirbs[i]);
       }
     }
   }
