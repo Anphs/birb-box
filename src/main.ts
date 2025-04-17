@@ -68,8 +68,8 @@ function createBirbs(birbTexture: Texture): Particle[] {
 
 function updateBirbs(birbs: Particle[], deltaTime: number): void {
   // Use squared distances for comparison
-  const visualDistSq = config.visualDistance ** 2;
-  const minDistSq = config.minDistance ** 2;
+  const visualDistSq = config.visualDistance * config.visualDistance;
+  const minDistSq = config.minDistance * config.minDistance;
 
   // Turn rate limit
   const maxTurn = config.turnSpeed * deltaTime;
@@ -94,7 +94,7 @@ function updateBirbs(birbs: Particle[], deltaTime: number): void {
       const other = birbs[j];
       const dx = other.x - birb.x;
       const dy = other.y - birb.y;
-      const distSq = dx ** 2 + dy ** 2;
+      const distSq = dx * dx + dy * dy;
 
       if (distSq < visualDistSq) {
         neighborCount++;
