@@ -11,6 +11,7 @@ import {
 import { config } from "./config";
 import { setupCamera } from "./camera";
 import { Birb, createBirbTexture } from "./birb";
+import { Grid } from "./grid";
 
 import "./style.css";
 
@@ -65,7 +66,11 @@ function createBirbs(birbTexture: Texture): Birb[] {
   return birbs;
 }
 
-function updateBirbs(birbs: Birb[], deltaTime: number): void {
+function createGrid(): Grid {
+  return new Grid(config.visualDistance, config.worldWidth, config.worldHeight);
+}
+
+function updateBirbs(grid: Grid, birbs: Birb[], deltaTime: number): void {
   // Use squared distances for comparison
   const visualDistSq = config.visualDistance * config.visualDistance;
   const minDistSq = config.minDistance * config.minDistance;
@@ -98,8 +103,11 @@ function updateBirbs(birbs: Birb[], deltaTime: number): void {
     let avoidY = 0;
     let neighborCount = 0;
 
-    for (let j = 0; j < birbs.length; j++) {
-      const other = birbs[j];
+    // Update birb's potential neighbors using the grid
+    grid.updatePotentialNeighbors(birb);
+
+    for (let j = 0; j < birb.potentialNeighbors.length; j++) {
+      const other = birb.potentialNeighbors[j];
       if (birb.id === other.id) continue;
 
       const dx = other.x - birb.x;
@@ -162,11 +170,20 @@ function updateBirbs(birbs: Birb[], deltaTime: number): void {
     birb.x += dx;
     birb.y += dy;
 
+    // Wrap on the x-axis
     if (birb.x < 0) birb.x += config.worldWidth;
     else if (birb.x >= config.worldWidth) birb.x -= config.worldWidth;
 
+    // Wrap on the y-axis
     if (birb.y < 0) birb.y += config.worldHeight;
     else if (birb.y >= config.worldHeight) birb.y -= config.worldHeight;
+
+    // Update grid
+    const { cellX, cellY } = grid.getCellCoordinates(birb.x, birb.y);
+    if (cellX !== birb.cachedCellX || cellY !== birb.cachedCellY) {
+      grid.remove(birb);
+      grid.insert(birb);
+    }
   }
 }
 
@@ -179,14 +196,19 @@ async function init(): Promise<void> {
 
   const birbTexture: Texture = createBirbTexture(app.renderer);
 
-  const birbs: Birb[] = createBirbs(birbTexture);
-
   const birbContainer = createBirbContainer();
-  birbs.forEach((birb) => birbContainer.addParticle(birb));
   birbScene.addChild(birbContainer);
 
+  const grid: Grid = createGrid();
+
+  const birbs: Birb[] = createBirbs(birbTexture);
+  for (const birb of birbs) {
+    birbContainer.addParticle(birb);
+    grid.insert(birb);
+  }
+
   app.ticker.add(({ deltaTime }) => {
-    updateBirbs(birbs, deltaTime);
+    updateBirbs(grid, birbs, deltaTime);
   });
 }
 

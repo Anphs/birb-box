@@ -9,6 +9,10 @@ export class Birb extends Particle {
   cachedCos: number;
   /** The previous sin of the previous rotation. */
   cachedSin: number;
+  /** The previous grid cell x-coordinate containing this birb. */
+  cachedCellX: number;
+  /** The previous grid cell y-coordinate containing this birb. */
+  cachedCellY: number;
   /** The potential neighbors of a birb. */
   potentialNeighbors: Birb[];
 
@@ -19,6 +23,8 @@ export class Birb extends Particle {
     this.cachedRotation = this.rotation;
     this.cachedCos = Math.cos(this.rotation);
     this.cachedSin = Math.sin(this.rotation);
+    this.cachedCellX = -1;
+    this.cachedCellY = -1;
     this.potentialNeighbors = [];
   }
 
