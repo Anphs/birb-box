@@ -2,7 +2,6 @@ import {
   Application,
   Container,
   Graphics,
-  Particle,
   ParticleContainer,
   Rectangle,
   Texture,
@@ -11,7 +10,7 @@ import {
 
 import { config } from "./config";
 import { setupCamera } from "./camera";
-import { createBirbTexture } from "./birb";
+import { Birb, createBirbTexture } from "./birb";
 
 import "./style.css";
 
@@ -50,10 +49,10 @@ function createBirbContainer(): ParticleContainer {
   });
 }
 
-function createBirbs(birbTexture: Texture): Particle[] {
-  const birbs: Particle[] = [];
+function createBirbs(birbTexture: Texture): Birb[] {
+  const birbs: Birb[] = [];
   for (let i = 0; i < config.maxBirbs; i++) {
-    const birb = new Particle({
+    const birb = new Birb({
       texture: birbTexture,
       x: Math.random() * config.worldWidth,
       y: Math.random() * config.worldHeight,
@@ -66,7 +65,7 @@ function createBirbs(birbTexture: Texture): Particle[] {
   return birbs;
 }
 
-function updateBirbs(birbs: Particle[], deltaTime: number): void {
+function updateBirbs(birbs: Birb[], deltaTime: number): void {
   // Use squared distances for comparison
   const visualDistSq = config.visualDistance * config.visualDistance;
   const minDistSq = config.minDistance * config.minDistance;
@@ -74,11 +73,22 @@ function updateBirbs(birbs: Particle[], deltaTime: number): void {
   // Turn rate limit
   const maxTurn = config.turnSpeed * deltaTime;
 
+  // Update sin and cos cache
+  for (let i = 0; i < birbs.length; i++) {
+    const birb: Birb = birbs[i];
+
+    if (birb.rotation !== birb.cachedRotation) {
+      birb.cachedCos = Math.cos(birb.rotation);
+      birb.cachedSin = Math.sin(birb.rotation);
+      birb.cachedRotation = birb.rotation;
+    }
+  }
+
   // Distance each birb will travel in this frame
   const distance: number = config.birbSpeed * deltaTime;
 
   for (let i = 0; i < birbs.length; i++) {
-    const birb: Particle = birbs[i];
+    const birb: Birb = birbs[i];
 
     let avgVX = 0;
     let avgVY = 0;
@@ -100,8 +110,8 @@ function updateBirbs(birbs: Particle[], deltaTime: number): void {
         neighborCount++;
 
         // Alignment
-        avgVX += Math.cos(other.rotation);
-        avgVY += Math.sin(other.rotation);
+        avgVX += other.cachedCos;
+        avgVY += other.cachedSin;
 
         // Cohesion
         centerX += other.x;
@@ -169,7 +179,7 @@ async function init(): Promise<void> {
 
   const birbTexture: Texture = createBirbTexture(app.renderer);
 
-  const birbs: Particle[] = createBirbs(birbTexture);
+  const birbs: Birb[] = createBirbs(birbTexture);
 
   const birbContainer = createBirbContainer();
   birbs.forEach((birb) => birbContainer.addParticle(birb));
