@@ -1,8 +1,10 @@
 import { Birb } from "./birb";
 
 interface GridCell {
+  /** The ID of this grid cell. */
   id: number;
-  birbs: Birb[];
+  /** The ID of the birbs contained in this grid cell. */
+  birbs: number[];
 }
 
 export class Grid {
@@ -62,7 +64,7 @@ export class Grid {
   /** Inserts a birb into a corresponding grid cell based upon location. */
   insert(birb: Birb): void {
     const { cellX, cellY } = this.getCellCoordinates(birb.x, birb.y);
-    this.cells[cellY][cellX].birbs.push(birb);
+    this.cells[cellY][cellX].birbs.push(birb.id);
 
     birb.cachedCellX = cellX;
     birb.cachedCellY = cellY;
@@ -71,7 +73,7 @@ export class Grid {
   /** Removes a birb from it's previous containing grid cell. */
   remove(birb: Birb): void {
     const cell = this.cells[birb.cachedCellY][birb.cachedCellX];
-    const index = cell.birbs.indexOf(birb);
+    const index = cell.birbs.indexOf(birb.id);
     cell.birbs.splice(index, 1);
   }
 
@@ -81,10 +83,10 @@ export class Grid {
     const cellY = Math.floor(birb.y / this.cellSize);
     if (cellX !== birb.cachedCellX || cellY !== birb.cachedCellY) {
       const cell = this.cells[birb.cachedCellY][birb.cachedCellX];
-      const index = cell.birbs.indexOf(birb);
+      const index = cell.birbs.indexOf(birb.id);
       cell.birbs.splice(index, 1);
 
-      this.cells[cellY][cellX].birbs.push(birb);
+      this.cells[cellY][cellX].birbs.push(birb.id);
 
       birb.cachedCellX = cellX;
       birb.cachedCellY = cellY;

@@ -107,7 +107,7 @@ function updateBirbs(grid: Grid, birbs: Birb[], deltaTime: number): void {
     grid.updatePotentialNeighbors(birb);
 
     for (let j = 0; j < birb.potentialNeighborCount; j++) {
-      const other = birb.potentialNeighbors[j];
+      const other = birbs[birb.potentialNeighbors[j]];
       if (birb.id === other.id) continue;
 
       const dx = other.x - birb.x;

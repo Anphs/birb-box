@@ -13,8 +13,8 @@ export class Birb extends Particle {
   cachedCellX: number;
   /** The previous grid cell y-coordinate containing this birb. */
   cachedCellY: number;
-  /** The fixed sized array containing the potential neighbors of a birb. */
-  potentialNeighbors: Birb[];
+  /** The fixed sized array containing potential neighbors IDs of a birb. */
+  potentialNeighbors: number[];
   /** The potential neighbor count of a birb. */
   potentialNeighborCount: number;
 
