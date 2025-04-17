@@ -96,7 +96,7 @@ export class Grid {
     const cols = this.cols;
     const rows = this.rows;
 
-    birb.clearPotentialNeighbors();
+    birb.potentialNeighborCount = 0;
 
     for (const { dx, dy } of this.neighborOffsets) {
       let cellX = birb.cachedCellX + dx;
@@ -110,7 +110,7 @@ export class Grid {
 
       const cellBirbs = this.cells[cellY][cellX].birbs;
       for (let i = 0; i < cellBirbs.length; i++) {
-        birb.potentialNeighbors.push(cellBirbs[i]);
+        birb.potentialNeighbors[birb.potentialNeighborCount++] = cellBirbs[i];
       }
     }
   }

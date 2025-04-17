@@ -13,8 +13,10 @@ export class Birb extends Particle {
   cachedCellX: number;
   /** The previous grid cell y-coordinate containing this birb. */
   cachedCellY: number;
-  /** The potential neighbors of a birb. */
+  /** The fixed sized array containing the potential neighbors of a birb. */
   potentialNeighbors: Birb[];
+  /** The potential neighbor count of a birb. */
+  potentialNeighborCount: number;
 
   constructor(id: number, ...args: ConstructorParameters<typeof Particle>) {
     super(...args);
@@ -25,11 +27,8 @@ export class Birb extends Particle {
     this.cachedSin = Math.sin(this.rotation);
     this.cachedCellX = -1;
     this.cachedCellY = -1;
-    this.potentialNeighbors = [];
-  }
-
-  clearPotentialNeighbors(): void {
-    this.potentialNeighbors.length = 0;
+    this.potentialNeighbors = new Array(64);
+    this.potentialNeighborCount = 0;
   }
 }
 
