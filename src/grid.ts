@@ -116,4 +116,16 @@ export class Grid {
       }
     }
   }
+
+  getCellSize(): number {
+    return this.cellSize;
+  }
+
+  getRows(): number {
+    return this.rows;
+  }
+
+  getCols(): number {
+    return this.cols;
+  }
 }

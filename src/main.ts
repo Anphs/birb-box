@@ -183,27 +183,49 @@ function updateBirbs(grid: Grid, birbs: Birb[], deltaTime: number): void {
   }
 }
 
-async function init(): Promise<void> {
-  const input = new InputHandler();
+function createGridLines(grid: Grid): Graphics {
+  const gridGraphics = new Graphics();
+  const cellSize = grid.getCellSize();
 
+  for (let x = 0; x <= grid.getCols(); x++) {
+    const posX = x * cellSize;
+    gridGraphics.moveTo(posX, 0).lineTo(posX, config.worldHeight);
+  }
+
+  for (let y = 0; y <= grid.getRows(); y++) {
+    const posY = y * cellSize;
+    gridGraphics.moveTo(0, posY).lineTo(config.worldWidth, posY);
+  }
+
+  gridGraphics.stroke({ color: 0xffffff, pixelLine: true, alpha: 0.2 });
+  gridGraphics.visible = false;
+
+  return gridGraphics;
+}
+
+async function init(): Promise<void> {
   const app: Application = await createApp();
   document.body.appendChild(app.canvas);
 
   const birbScene: Container = createBirbScene(app);
   app.stage.addChild(birbScene);
 
+  const grid: Grid = createGrid();
+  const gridLines = createGridLines(grid);
+  birbScene.addChild(gridLines);
+
   const birbTexture: Texture = createBirbTexture(app.renderer);
 
   const birbContainer = createBirbContainer();
   birbScene.addChild(birbContainer);
-
-  const grid: Grid = createGrid();
 
   const birbs: Birb[] = createBirbs(birbTexture);
   for (const birb of birbs) {
     birbContainer.addParticle(birb);
     grid.insert(birb);
   }
+
+  const input = new InputHandler(gridLines);
 
   app.ticker.add(({ deltaTime }) => {
     if (input.isPaused()) return;
