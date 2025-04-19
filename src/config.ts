@@ -1,8 +1,8 @@
 export const config = {
-  worldWidth: 10240,
-  worldHeight: 10240,
+  worldWidth: 102400,
+  worldHeight: 102400,
 
-  maxBirbs: 10000,
+  birbCount: 100000,
   birbSpeed: 4,
   turnSpeed: 0.05,
 
