@@ -12,6 +12,7 @@ import { config } from "./config";
 import { setupCamera } from "./camera";
 import { Birb, createBirbTexture } from "./birb";
 import { Grid } from "./grid";
+import { InputHandler } from "./input";
 
 import "./style.css";
 
@@ -46,7 +47,6 @@ function createBirbContainer(): ParticleContainer {
       color: false,
     },
     boundsArea: new Rectangle(0, 0, config.worldWidth, config.worldHeight),
-    cullArea: new Rectangle(0, 0, config.worldWidth, config.worldHeight),
   });
 }
 
@@ -184,6 +184,8 @@ function updateBirbs(grid: Grid, birbs: Birb[], deltaTime: number): void {
 }
 
 async function init(): Promise<void> {
+  const input = new InputHandler();
+
   const app: Application = await createApp();
   document.body.appendChild(app.canvas);
 
@@ -204,6 +206,8 @@ async function init(): Promise<void> {
   }
 
   app.ticker.add(({ deltaTime }) => {
+    if (input.isPaused()) return;
+
     updateBirbs(grid, birbs, deltaTime);
   });
 }
