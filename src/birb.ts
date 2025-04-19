@@ -1,4 +1,36 @@
-import { Graphics, Renderer, Texture } from "pixi.js";
+import { Graphics, Particle, Renderer, Texture } from "pixi.js";
+
+export class Birb extends Particle {
+  /** The ID of this birb. */
+  id: number;
+  /** The previous rotation. */
+  cachedRotation: number;
+  /** The previous cos of the previous rotation. */
+  cachedCos: number;
+  /** The previous sin of the previous rotation. */
+  cachedSin: number;
+  /** The previous grid cell x-coordinate containing this birb. */
+  cachedCellX: number;
+  /** The previous grid cell y-coordinate containing this birb. */
+  cachedCellY: number;
+  /** The fixed sized array containing potential neighbors IDs of a birb. */
+  potentialNeighbors: number[];
+  /** The potential neighbor count of a birb. */
+  potentialNeighborCount: number;
+
+  constructor(id: number, ...args: ConstructorParameters<typeof Particle>) {
+    super(...args);
+
+    this.id = id;
+    this.cachedRotation = this.rotation;
+    this.cachedCos = Math.cos(this.rotation);
+    this.cachedSin = Math.sin(this.rotation);
+    this.cachedCellX = -1;
+    this.cachedCellY = -1;
+    this.potentialNeighbors = new Array(64);
+    this.potentialNeighborCount = 0;
+  }
+}
 
 export function createBirbTexture(renderer: Renderer): Texture {
   const birb = new Graphics();

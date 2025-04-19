@@ -2,7 +2,6 @@ import {
   Application,
   Container,
   Graphics,
-  Particle,
   ParticleContainer,
   Rectangle,
   Texture,
@@ -11,7 +10,9 @@ import {
 
 import { config } from "./config";
 import { setupCamera } from "./camera";
-import { createBirbTexture } from "./birb";
+import { Birb, createBirbTexture } from "./birb";
+import { Grid } from "./grid";
+import { InputHandler } from "./input";
 
 import "./style.css";
 
@@ -46,14 +47,13 @@ function createBirbContainer(): ParticleContainer {
       color: false,
     },
     boundsArea: new Rectangle(0, 0, config.worldWidth, config.worldHeight),
-    cullArea: new Rectangle(0, 0, config.worldWidth, config.worldHeight),
   });
 }
 
-function createBirbs(birbTexture: Texture): Particle[] {
-  const birbs: Particle[] = [];
+function createBirbs(birbTexture: Texture): Birb[] {
+  const birbs: Birb[] = [];
   for (let i = 0; i < config.maxBirbs; i++) {
-    const birb = new Particle({
+    const birb = new Birb(i, {
       texture: birbTexture,
       x: Math.random() * config.worldWidth,
       y: Math.random() * config.worldHeight,
@@ -66,19 +66,34 @@ function createBirbs(birbTexture: Texture): Particle[] {
   return birbs;
 }
 
-function updateBirbs(birbs: Particle[], deltaTime: number): void {
+function createGrid(): Grid {
+  return new Grid(config.visualDistance, config.worldWidth, config.worldHeight);
+}
+
+function updateBirbs(grid: Grid, birbs: Birb[], deltaTime: number): void {
   // Use squared distances for comparison
-  const visualDistSq = config.visualDistance ** 2;
-  const minDistSq = config.minDistance ** 2;
+  const visualDistSq = config.visualDistance * config.visualDistance;
+  const minDistSq = config.minDistance * config.minDistance;
 
   // Turn rate limit
   const maxTurn = config.turnSpeed * deltaTime;
+
+  // Update sin and cos cache
+  for (let i = 0; i < birbs.length; i++) {
+    const birb: Birb = birbs[i];
+
+    if (birb.rotation !== birb.cachedRotation) {
+      birb.cachedCos = Math.cos(birb.rotation);
+      birb.cachedSin = Math.sin(birb.rotation);
+      birb.cachedRotation = birb.rotation;
+    }
+  }
 
   // Distance each birb will travel in this frame
   const distance: number = config.birbSpeed * deltaTime;
 
   for (let i = 0; i < birbs.length; i++) {
-    const birb: Particle = birbs[i];
+    const birb: Birb = birbs[i];
 
     let avgVX = 0;
     let avgVY = 0;
@@ -88,20 +103,23 @@ function updateBirbs(birbs: Particle[], deltaTime: number): void {
     let avoidY = 0;
     let neighborCount = 0;
 
-    for (let j = 0; j < birbs.length; j++) {
-      if (i === j) continue;
+    // Update birb's potential neighbors using the grid
+    grid.updatePotentialNeighbors(birb);
 
-      const other = birbs[j];
+    for (let j = 0; j < birb.potentialNeighborCount; j++) {
+      const other = birbs[birb.potentialNeighbors[j]];
+      if (birb.id === other.id) continue;
+
       const dx = other.x - birb.x;
       const dy = other.y - birb.y;
-      const distSq = dx ** 2 + dy ** 2;
+      const distSq = dx * dx + dy * dy;
 
       if (distSq < visualDistSq) {
         neighborCount++;
 
         // Alignment
-        avgVX += Math.cos(other.rotation);
-        avgVY += Math.sin(other.rotation);
+        avgVX += other.cachedCos;
+        avgVY += other.cachedSin;
 
         // Cohesion
         centerX += other.x;
@@ -152,12 +170,37 @@ function updateBirbs(birbs: Particle[], deltaTime: number): void {
     birb.x += dx;
     birb.y += dy;
 
+    // Wrap on the x-axis
     if (birb.x < 0) birb.x += config.worldWidth;
     else if (birb.x >= config.worldWidth) birb.x -= config.worldWidth;
 
+    // Wrap on the y-axis
     if (birb.y < 0) birb.y += config.worldHeight;
     else if (birb.y >= config.worldHeight) birb.y -= config.worldHeight;
+
+    // Update grid
+    grid.update(birb);
   }
+}
+
+function createGridLines(grid: Grid): Graphics {
+  const gridGraphics = new Graphics();
+  const cellSize = grid.getCellSize();
+
+  for (let x = 0; x <= grid.getCols(); x++) {
+    const posX = x * cellSize;
+    gridGraphics.moveTo(posX, 0).lineTo(posX, config.worldHeight);
+  }
+
+  for (let y = 0; y <= grid.getRows(); y++) {
+    const posY = y * cellSize;
+    gridGraphics.moveTo(0, posY).lineTo(config.worldWidth, posY);
+  }
+
+  gridGraphics.stroke({ color: 0xffffff, pixelLine: true, alpha: 0.2 });
+  gridGraphics.visible = false;
+
+  return gridGraphics;
 }
 
 async function init(): Promise<void> {
@@ -167,16 +210,27 @@ async function init(): Promise<void> {
   const birbScene: Container = createBirbScene(app);
   app.stage.addChild(birbScene);
 
+  const grid: Grid = createGrid();
+  const gridLines = createGridLines(grid);
+  birbScene.addChild(gridLines);
+
   const birbTexture: Texture = createBirbTexture(app.renderer);
 
-  const birbs: Particle[] = createBirbs(birbTexture);
-
   const birbContainer = createBirbContainer();
-  birbs.forEach((birb) => birbContainer.addParticle(birb));
   birbScene.addChild(birbContainer);
 
+  const birbs: Birb[] = createBirbs(birbTexture);
+  for (const birb of birbs) {
+    birbContainer.addParticle(birb);
+    grid.insert(birb);
+  }
+
+  const input = new InputHandler(gridLines);
+
   app.ticker.add(({ deltaTime }) => {
-    updateBirbs(birbs, deltaTime);
+    if (input.isPaused()) return;
+
+    updateBirbs(grid, birbs, deltaTime);
   });
 }
 
