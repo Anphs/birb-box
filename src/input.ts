@@ -34,16 +34,16 @@ export class InputHandler {
           this.onFollow();
           break;
         case "0":
-          this.onStatistics(0);
+          this.onStatistics(-1);
           break;
         case "1":
-          this.onStatistics(1);
+          this.onStatistics(0);
           break;
         case "2":
-          this.onStatistics(2);
+          this.onStatistics(1);
           break;
         case "3":
-          this.onStatistics(-1);
+          this.onStatistics(2);
           break;
       }
     });
