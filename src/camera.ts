@@ -1,54 +1,80 @@
 import { Application, Container, Point } from "pixi.js";
 
 import { camera as config } from "./config";
+import { Birb } from "./birb";
 
-export function setupCamera(app: Application, container: Container): void {
-  let dragging: boolean = false;
-  let lastMouse: { x: number; y: number } | null = null;
+export class CameraHandler {
+  private dragging = false;
+  private lastMouse: { x: number; y: number } | null = null;
+  private followBirb: Birb | null = null;
 
-  app.canvas.addEventListener("mousedown", (e: MouseEvent) => {
-    dragging = true;
-    lastMouse = { x: e.clientX, y: e.clientY };
-  });
+  constructor(private app: Application, private container: Container) {
+    this.attachMouseEvents();
+  }
 
-  app.canvas.addEventListener("mousemove", (e: MouseEvent) => {
-    if (dragging && lastMouse) {
-      const dx = e.clientX - lastMouse.x;
-      const dy = e.clientY - lastMouse.y;
+  follow(birb: Birb | null): void {
+    this.followBirb = birb;
+  }
 
-      container.x += dx;
-      container.y += dy;
+  update(): void {
+    if (this.followBirb) {
+      const scale = this.container.scale.x;
+      const centerX = this.app.canvas.width / 2;
+      const centerY = this.app.canvas.height / 2;
 
-      lastMouse = { x: e.clientX, y: e.clientY };
+      this.container.x = centerX - this.followBirb.x * scale;
+      this.container.y = centerY - this.followBirb.y * scale;
     }
-  });
+  }
 
-  app.canvas.addEventListener("mouseup", () => {
-    dragging = false;
-  });
+  private attachMouseEvents(): void {
+    this.app.canvas.addEventListener("mousedown", (e: MouseEvent) => {
+      this.dragging = true;
+      this.lastMouse = { x: e.clientX, y: e.clientY };
+      this.follow(null);
+    });
 
-  app.canvas.addEventListener("mouseleave", () => {
-    dragging = false;
-  });
+    this.app.canvas.addEventListener("mousemove", (e: MouseEvent) => {
+      if (this.dragging && this.lastMouse) {
+        const dx = e.clientX - this.lastMouse.x;
+        const dy = e.clientY - this.lastMouse.y;
 
-  app.canvas.addEventListener("wheel", (e: WheelEvent) => {
-    function clampScale(scale: number): number {
-      return Math.max(config.minScale, Math.min(config.maxScale, scale));
-    }
+        this.container.x += dx;
+        this.container.y += dy;
 
-    const direction: number =
-      e.deltaY > 0 ? 1 / config.scaleAmount : config.scaleAmount;
+        this.lastMouse = { x: e.clientX, y: e.clientY };
+      }
+    });
 
-    const mousePos: Point = new Point(e.clientX, e.clientY);
-    const localMousePos: Point = container.toLocal(mousePos);
+    this.app.canvas.addEventListener("mouseup", () => {
+      this.dragging = false;
+    });
 
-    container.scale.x = clampScale(container.scale.x * direction);
-    container.scale.y = clampScale(container.scale.y * direction);
+    this.app.canvas.addEventListener("mouseleave", () => {
+      this.dragging = false;
+    });
 
-    // Mouse position after the zoom
-    const newLocalMousePos: Point = container.toLocal(mousePos);
+    this.app.canvas.addEventListener("wheel", (e: WheelEvent) => {
+      function clampScale(scale: number): number {
+        return Math.max(config.minScale, Math.min(config.maxScale, scale));
+      }
 
-    container.x += (newLocalMousePos.x - localMousePos.x) * container.scale.x;
-    container.y += (newLocalMousePos.y - localMousePos.y) * container.scale.y;
-  });
+      const direction: number =
+        e.deltaY > 0 ? 1 / config.scaleAmount : config.scaleAmount;
+
+      const mousePos: Point = new Point(e.clientX, e.clientY);
+      const localMousePos: Point = this.container.toLocal(mousePos);
+
+      this.container.scale.x = clampScale(this.container.scale.x * direction);
+      this.container.scale.y = clampScale(this.container.scale.y * direction);
+
+      // Mouse position after the zoom
+      const newLocalMousePos: Point = this.container.toLocal(mousePos);
+
+      this.container.x +=
+        (newLocalMousePos.x - localMousePos.x) * this.container.scale.x;
+      this.container.y +=
+        (newLocalMousePos.y - localMousePos.y) * this.container.scale.y;
+    });
+  }
 }

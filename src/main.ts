@@ -8,13 +8,15 @@ import {
   TextureStyle,
 } from "pixi.js";
 
+import "./style.css";
+
 import { config } from "./config";
-import { setupCamera } from "./camera";
+
 import { Birb, createBirbTexture } from "./birb";
 import { Grid } from "./grid";
-import { InputHandler } from "./input";
 
-import "./style.css";
+import { InputHandler } from "./input";
+import { CameraHandler } from "./camera";
 
 async function createApp(): Promise<Application> {
   TextureStyle.defaultOptions.scaleMode = "nearest";
@@ -28,7 +30,6 @@ function createBirbScene(app: Application): Container {
   const birbScene: Container = new Container();
   birbScene.x = app.canvas.width / 2 - config.worldWidth / 2;
   birbScene.y = app.canvas.height / 2 - config.worldHeight / 2;
-  setupCamera(app, birbScene);
 
   const worldBackground = new Graphics()
     .rect(0, 0, config.worldWidth, config.worldHeight)
@@ -225,12 +226,20 @@ async function init(): Promise<void> {
     grid.insert(birb);
   }
 
-  const input = new InputHandler(gridLines);
+  const camera: CameraHandler = new CameraHandler(app, birbScene);
+
+  function followRandomBirb() {
+    const randomIndex = Math.floor(Math.random() * birbs.length);
+    camera.follow(birbs[randomIndex]);
+  }
+
+  const input = new InputHandler(gridLines, followRandomBirb);
 
   app.ticker.add(({ deltaTime }) => {
     if (input.isPaused()) return;
 
     updateBirbs(grid, birbs, deltaTime);
+    camera.update();
   });
 }
 

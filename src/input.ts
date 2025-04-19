@@ -3,10 +3,13 @@ import { Container } from "pixi.js";
 export class InputHandler {
   /** The state of the world. */
   private paused: boolean = false;
-  /** The lines outlining each grid cell. */
-  private gridLines: Container;
 
-  constructor(gridLines: Container) {
+  constructor(
+    /** The lines outlining each grid cell. */
+    private gridLines: Container,
+    /** The callback to execute follow a birb. */
+    private onFollow: () => void
+  ) {
     this.gridLines = gridLines;
 
     window.addEventListener("keydown", (e) => {
@@ -16,6 +19,9 @@ export class InputHandler {
           break;
         case "g":
           this.toggleGridLines();
+          break;
+        case "f":
+          this.onFollow();
           break;
       }
     });
