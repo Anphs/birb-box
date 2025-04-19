@@ -8,7 +8,9 @@ export class InputHandler {
     /** The lines outlining each grid cell. */
     private gridLines: Container,
     /** The callback to execute follow a birb. */
-    private onFollow: () => void
+    private onFollow: () => void,
+    /** The callback to change statistic panels. */
+    private onStatistics: (id: number) => void
   ) {
     this.gridLines = gridLines;
 
@@ -22,6 +24,18 @@ export class InputHandler {
           break;
         case "f":
           this.onFollow();
+          break;
+        case "0":
+          this.onStatistics(0);
+          break;
+        case "1":
+          this.onStatistics(1);
+          break;
+        case "2":
+          this.onStatistics(2);
+          break;
+        case "3":
+          this.onStatistics(-1);
           break;
       }
     });

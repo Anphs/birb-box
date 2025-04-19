@@ -7,6 +7,7 @@ import {
   Texture,
   TextureStyle,
 } from "pixi.js";
+import { Stats } from "pixi-stats";
 
 import "./style.css";
 
@@ -226,6 +227,12 @@ async function init(): Promise<void> {
     grid.insert(birb);
   }
 
+  const stats = new Stats(app.renderer);
+  stats.showPanel(-1);
+  function changeStatsPanel(id: number): void {
+    stats.showPanel(id);
+  }
+
   const camera: CameraHandler = new CameraHandler(app, birbScene);
 
   function followRandomBirb() {
@@ -233,7 +240,7 @@ async function init(): Promise<void> {
     camera.follow(birbs[randomIndex]);
   }
 
-  const input = new InputHandler(gridLines, followRandomBirb);
+  const input = new InputHandler(gridLines, followRandomBirb, changeStatsPanel);
 
   app.ticker.add(({ deltaTime }) => {
     if (input.isPaused()) return;
