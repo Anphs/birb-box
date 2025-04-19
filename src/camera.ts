@@ -3,12 +3,24 @@ import { Application, Container, Point } from "pixi.js";
 import { camera as config } from "./config";
 import { Birb } from "./birb";
 
+interface CameraHandlerOptions {
+  /** Application to attach the camera to. */
+  application: Application;
+  /** Container to apply camera transformations to. */
+  container: Container;
+}
+
 export class CameraHandler {
   private dragging = false;
   private lastMouse: { x: number; y: number } | null = null;
   private followBirb: Birb | null = null;
 
-  constructor(private app: Application, private container: Container) {
+  private app: Application;
+  private container: Container;
+
+  constructor({ application: app, container }: CameraHandlerOptions) {
+    this.app = app;
+    this.container = container;
     this.attachMouseEvents();
   }
 

@@ -233,14 +233,21 @@ async function init(): Promise<void> {
     stats.showPanel(id);
   }
 
-  const camera: CameraHandler = new CameraHandler(app, birbScene);
+  const camera: CameraHandler = new CameraHandler({
+    application: app,
+    container: birbScene,
+  });
 
   function followRandomBirb() {
     const randomIndex = Math.floor(Math.random() * birbs.length);
     camera.follow(birbs[randomIndex]);
   }
 
-  const input = new InputHandler(gridLines, followRandomBirb, changeStatsPanel);
+  const input = new InputHandler({
+    gridLines: gridLines,
+    onFollow: followRandomBirb,
+    onStatistics: changeStatsPanel,
+  });
 
   app.ticker.add(({ deltaTime }) => {
     if (input.isPaused()) return;

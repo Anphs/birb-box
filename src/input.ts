@@ -1,18 +1,26 @@
 import { Container } from "pixi.js";
 
+interface InputHandlerOptions {
+  /** The lines outlining each grid cell. */
+  gridLines: Container;
+  /** The callback to execute follow a birb. */
+  onFollow: () => void;
+  /** The callback to change statistic panels. */
+  onStatistics: (id: number) => void;
+}
+
 export class InputHandler {
   /** The state of the world. */
   private paused: boolean = false;
 
-  constructor(
-    /** The lines outlining each grid cell. */
-    private gridLines: Container,
-    /** The callback to execute follow a birb. */
-    private onFollow: () => void,
-    /** The callback to change statistic panels. */
-    private onStatistics: (id: number) => void
-  ) {
+  private gridLines: Container;
+  private onFollow: () => void;
+  private onStatistics: (id: number) => void;
+
+  constructor({ gridLines, onFollow, onStatistics }: InputHandlerOptions) {
     this.gridLines = gridLines;
+    this.onFollow = onFollow;
+    this.onStatistics = onStatistics;
 
     window.addEventListener("keydown", (e) => {
       switch (e.key.toLowerCase()) {
