@@ -7,14 +7,17 @@ import {
   Texture,
   TextureStyle,
 } from "pixi.js";
-
-import { config } from "./config";
-import { setupCamera } from "./camera";
-import { Birb, createBirbTexture } from "./birb";
-import { Grid } from "./grid";
-import { InputHandler } from "./input";
+import { Stats } from "pixi-stats";
 
 import "./style.css";
+
+import { config } from "./config";
+
+import { Birb, createBirbTexture } from "./birb";
+import { Grid } from "./grid";
+
+import { InputHandler } from "./input";
+import { CameraHandler } from "./camera";
 
 async function createApp(): Promise<Application> {
   TextureStyle.defaultOptions.scaleMode = "nearest";
@@ -28,7 +31,6 @@ function createBirbScene(app: Application): Container {
   const birbScene: Container = new Container();
   birbScene.x = app.canvas.width / 2 - config.worldWidth / 2;
   birbScene.y = app.canvas.height / 2 - config.worldHeight / 2;
-  setupCamera(app, birbScene);
 
   const worldBackground = new Graphics()
     .rect(0, 0, config.worldWidth, config.worldHeight)
@@ -50,9 +52,15 @@ function createBirbContainer(): ParticleContainer {
   });
 }
 
+function getBirbCount(): number {
+  const params = new URLSearchParams(window.location.search);
+  const birbCount = parseInt(params.get("birbs") || "");
+  return isNaN(birbCount) ? config.birbCount : birbCount;
+}
+
 function createBirbs(birbTexture: Texture): Birb[] {
   const birbs: Birb[] = [];
-  for (let i = 0; i < config.maxBirbs; i++) {
+  for (let i = 0; i < getBirbCount(); i++) {
     const birb = new Birb(i, {
       texture: birbTexture,
       x: Math.random() * config.worldWidth,
@@ -70,7 +78,12 @@ function createGrid(): Grid {
   return new Grid(config.visualDistance, config.worldWidth, config.worldHeight);
 }
 
-function updateBirbs(grid: Grid, birbs: Birb[], deltaTime: number): void {
+function updateBirbs(
+  grid: Grid,
+  birbs: Birb[],
+  deltaTime: number,
+  useGrid: boolean
+): void {
   // Use squared distances for comparison
   const visualDistSq = config.visualDistance * config.visualDistance;
   const minDistSq = config.minDistance * config.minDistance;
@@ -104,10 +117,12 @@ function updateBirbs(grid: Grid, birbs: Birb[], deltaTime: number): void {
     let neighborCount = 0;
 
     // Update birb's potential neighbors using the grid
-    grid.updatePotentialNeighbors(birb);
+    if (useGrid) grid.updatePotentialNeighbors(birb);
 
-    for (let j = 0; j < birb.potentialNeighborCount; j++) {
-      const other = birbs[birb.potentialNeighbors[j]];
+    const nearbyCount = useGrid ? birb.potentialNeighborCount : birbs.length;
+
+    for (let j = 0; j < nearbyCount; j++) {
+      const other = useGrid ? birbs[birb.potentialNeighbors[j]] : birbs[j];
       if (birb.id === other.id) continue;
 
       const dx = other.x - birb.x;
@@ -179,7 +194,7 @@ function updateBirbs(grid: Grid, birbs: Birb[], deltaTime: number): void {
     else if (birb.y >= config.worldHeight) birb.y -= config.worldHeight;
 
     // Update grid
-    grid.update(birb);
+    if (useGrid) grid.update(birb);
   }
 }
 
@@ -225,12 +240,33 @@ async function init(): Promise<void> {
     grid.insert(birb);
   }
 
-  const input = new InputHandler(gridLines);
+  const stats = new Stats(app.renderer);
+  stats.showPanel(-1);
+  function changeStatsPanel(id: number): void {
+    stats.showPanel(id);
+  }
+
+  const camera: CameraHandler = new CameraHandler({
+    application: app,
+    container: birbScene,
+  });
+
+  function followRandomBirb() {
+    const randomIndex = Math.floor(Math.random() * birbs.length);
+    camera.follow(birbs[randomIndex]);
+  }
+
+  const input = new InputHandler({
+    gridLines: gridLines,
+    onFollow: followRandomBirb,
+    onStatistics: changeStatsPanel,
+  });
 
   app.ticker.add(({ deltaTime }) => {
     if (input.isPaused()) return;
 
-    updateBirbs(grid, birbs, deltaTime);
+    updateBirbs(grid, birbs, deltaTime, input.useGrid());
+    camera.update();
   });
 }
 
