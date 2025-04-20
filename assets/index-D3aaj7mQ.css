@@ -1,0 +1,1 @@
+body{margin:0}body canvas{position:absolute}body #stats{position:fixed;top:0;left:0;z-index:1000;pointer-events:none}body #stats canvas{width:max(100px,10vw,10vh);height:max(60px,6vh,6vw);-webkit-user-select:none;user-select:none}
