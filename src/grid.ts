@@ -27,8 +27,8 @@ export class Grid {
     this.cellSize = cellSize;
     this.gridWidth = gridWidth;
     this.gridHeight = gridHeight;
-    this.rows = Math.ceil(this.gridWidth / this.cellSize);
-    this.cols = Math.ceil(this.gridHeight / this.cellSize);
+    this.rows = Math.ceil(this.gridHeight / this.cellSize);
+    this.cols = Math.ceil(this.gridWidth / this.cellSize);
     this.cells = this.createEmptyGrid();
     this.neighborOffsets = [
       { dx: -1, dy: -1 },
