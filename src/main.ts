@@ -78,7 +78,12 @@ function createGrid(): Grid {
   return new Grid(config.visualDistance, config.worldWidth, config.worldHeight);
 }
 
-function updateBirbs(grid: Grid, birbs: Birb[], deltaTime: number): void {
+function updateBirbs(
+  grid: Grid,
+  birbs: Birb[],
+  deltaTime: number,
+  useGrid: boolean
+): void {
   // Use squared distances for comparison
   const visualDistSq = config.visualDistance * config.visualDistance;
   const minDistSq = config.minDistance * config.minDistance;
@@ -112,10 +117,12 @@ function updateBirbs(grid: Grid, birbs: Birb[], deltaTime: number): void {
     let neighborCount = 0;
 
     // Update birb's potential neighbors using the grid
-    grid.updatePotentialNeighbors(birb);
+    if (useGrid) grid.updatePotentialNeighbors(birb);
 
-    for (let j = 0; j < birb.potentialNeighborCount; j++) {
-      const other = birbs[birb.potentialNeighbors[j]];
+    const nearbyCount = useGrid ? birb.potentialNeighborCount : birbs.length;
+
+    for (let j = 0; j < nearbyCount; j++) {
+      const other = useGrid ? birbs[birb.potentialNeighbors[j]] : birbs[j];
       if (birb.id === other.id) continue;
 
       const dx = other.x - birb.x;
@@ -187,7 +194,7 @@ function updateBirbs(grid: Grid, birbs: Birb[], deltaTime: number): void {
     else if (birb.y >= config.worldHeight) birb.y -= config.worldHeight;
 
     // Update grid
-    grid.update(birb);
+    if (useGrid) grid.update(birb);
   }
 }
 
@@ -258,7 +265,7 @@ async function init(): Promise<void> {
   app.ticker.add(({ deltaTime }) => {
     if (input.isPaused()) return;
 
-    updateBirbs(grid, birbs, deltaTime);
+    updateBirbs(grid, birbs, deltaTime, input.useGrid());
     camera.update();
   });
 }

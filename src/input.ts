@@ -10,8 +10,10 @@ interface InputHandlerOptions {
 }
 
 export class InputHandler {
-  /** The state of the world. */
+  /** The pause state of the world. */
   private paused: boolean = false;
+  /** Whether uniform grid spatial subdivision is used. */
+  private gridOptimization: boolean = true;
 
   private gridLines: Container;
   private onFollow: () => void;
@@ -26,6 +28,9 @@ export class InputHandler {
       switch (e.key.toLowerCase()) {
         case "p":
           this.togglePause();
+          break;
+        case "o":
+          this.toggleGridOptimization();
           break;
         case "g":
           this.toggleGridLines();
@@ -53,11 +58,19 @@ export class InputHandler {
     this.paused = !this.paused;
   }
 
+  private toggleGridOptimization(): void {
+    this.gridOptimization = !this.gridOptimization;
+  }
+
   private toggleGridLines(): void {
     this.gridLines.visible = !this.gridLines.visible;
   }
 
   isPaused(): boolean {
     return this.paused;
+  }
+
+  useGrid(): boolean {
+    return this.gridOptimization;
   }
 }
