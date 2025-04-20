@@ -2,6 +2,33 @@
 
 A high-performance boid (birb) simulation built with [PixiJS](https://pixijs.com/). Simulates flocking behavior of up to 100,000 birbs using particle containers and uniform grid bucketing.
 
+## Features
+
+- ParticleContainer rendering for efficient batched drawing.
+- Uniform grid bucketing for spatial partitioning.
+- Grid visualization toggle.
+- Camera panning, zooming, and birb-follow mode.
+- Statistics panels: FPS, render time, memory usage.
+- Runtime configuration via URL query parameters.
+
+## Demo
+
+You can try out the live demo here:
+
+[**Live Demo**](https://Anphs.github.io/birb-box/)
+
+## Controls
+
+| Key             | Action                     |
+| --------------- | -------------------------- |
+| `P`             | Toggle pause/resume        |
+| `G`             | Toggle visual grid overlay |
+| `O`             | Toggle grid optimization   |
+| `F`             | Follow a random birb       |
+| `0`/`1`/`2`/`3` | Switch stat panels         |
+| Mouse Drag      | Pan camera                 |
+| Mouse Wheel     | Zoom camera                |
+
 ## About Boids Algorithm
 
 This project simulates flocking behavior using **Boids**, a classic algorithm developed by Craig Reynolds in 1986 to model the movement of birds, fish, or other swarming entities.
@@ -13,16 +40,6 @@ Each boid follows three simple rules:
 3. **Separation** – Avoid crowding nearby boids.
 
 Despite their simplicity, these rules produce complex and lifelike group behavior.
-
-## Features
-
-- Responsive and performant rendering via [PixiJS](https://pixijs.com/).
-- ParticleContainer rendering for efficient batched drawing.
-- Uniform grid bucketing for spatial partitioning.
-- Grid visualization toggle.
-- Camera panning, zooming, and birb-follow mode.
-- Statistics panels: FPS, Render Time, Memory Usage.
-- Runtime configuration via URL query parameters.
 
 ## Getting Started
 
@@ -44,8 +61,6 @@ npm run dev
 ```
 
 Open your browser at `http://localhost:5173`.
-
----
 
 ## Configuration
 
@@ -77,22 +92,6 @@ You can apply these parameters in the URL like so:
 ?birbCount=100000&worldWidth=102400&worldHeight=102400
 ```
 
----
-
-## Controls
-
-| Key             | Action                     |
-| --------------- | -------------------------- |
-| `P`             | Toggle pause/resume        |
-| `G`             | Toggle visual grid overlay |
-| `O`             | Toggle grid optimization   |
-| `F`             | Follow a random birb       |
-| `0`/`1`/`2`/`3` | Switch stat panels         |
-| Mouse Drag      | Pan camera                 |
-| Mouse Wheel     | Zoom camera                |
-
----
-
 ## Project Structure
 
 ```
@@ -105,8 +104,6 @@ src/
 ├── main.ts # Entry point
 └── style.css # Styling
 ```
-
----
 
 ## License
 
