@@ -68,11 +68,11 @@ export class CameraHandler {
 
     this.app.canvas.addEventListener("wheel", (e: WheelEvent) => {
       function clampScale(scale: number): number {
-        return Math.max(config.minScale, Math.min(config.maxScale, scale));
+        return Math.max(config.minZoom, Math.min(config.maxZoom, scale));
       }
 
       const direction: number =
-        e.deltaY > 0 ? 1 / config.scaleAmount : config.scaleAmount;
+        e.deltaY > 0 ? 1 / config.zoomFactor : config.zoomFactor;
 
       const mousePos: Point = new Point(e.clientX, e.clientY);
       const localMousePos: Point = this.container.toLocal(mousePos);

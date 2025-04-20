@@ -52,15 +52,9 @@ function createBirbContainer(): ParticleContainer {
   });
 }
 
-function getBirbCount(): number {
-  const params = new URLSearchParams(window.location.search);
-  const birbCount = parseInt(params.get("birbs") || "");
-  return isNaN(birbCount) ? config.birbCount : birbCount;
-}
-
 function createBirbs(birbTexture: Texture): Birb[] {
   const birbs: Birb[] = [];
-  for (let i = 0; i < getBirbCount(); i++) {
+  for (let i = 0; i < config.birbCount; i++) {
     const birb = new Birb(i, {
       texture: birbTexture,
       x: Math.random() * config.worldWidth,
