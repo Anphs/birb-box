@@ -32,7 +32,7 @@ export class Birb extends Particle {
   }
 }
 
-export function createBirbTexture(renderer: Renderer): Texture {
+export function createBirbTexture(renderer: Renderer, color: number): Texture {
   const birb = new Graphics();
 
   birb.moveTo(8, 0);
@@ -41,7 +41,7 @@ export function createBirbTexture(renderer: Renderer): Texture {
   birb.lineTo(-8, 8);
   birb.closePath();
 
-  birb.fill({ color: 0xffffff });
+  birb.fill({ color: color });
 
   return renderer.generateTexture(birb);
 }

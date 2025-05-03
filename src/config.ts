@@ -42,6 +42,18 @@ export const config = {
 
   /** Weight of the separation rule (avoiding crowding). */
   separationFactor: parseParam.float("separationFactor", 0.2),
+
+  /** Simulation world color. */
+  worldColor: 0x000000,
+
+  /** Background world color */
+  backgroundColor: 0x222222,
+
+  /** Fill color to draw birbs. */
+  birbColor: 0xffffff,
+
+  /** Grid line colors. */
+  gridColor: 0xffffff,
 };
 
 /** Camera behavior constants */

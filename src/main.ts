@@ -23,7 +23,7 @@ async function createApp(): Promise<Application> {
   TextureStyle.defaultOptions.scaleMode = "nearest";
   const app: Application = new Application();
   return app
-    .init({ resizeTo: window, backgroundColor: 0x222222 })
+    .init({ resizeTo: window, backgroundColor: config.backgroundColor })
     .then(() => app);
 }
 
@@ -34,7 +34,7 @@ function createBirbScene(app: Application): Container {
 
   const worldBackground = new Graphics()
     .rect(0, 0, config.worldWidth, config.worldHeight)
-    .fill("black");
+    .fill(config.worldColor);
   birbScene.addChild(worldBackground);
 
   return birbScene;
@@ -206,7 +206,7 @@ function createGridLines(grid: Grid): Graphics {
     gridGraphics.moveTo(0, posY).lineTo(config.worldWidth, posY);
   }
 
-  gridGraphics.stroke({ color: 0xffffff, pixelLine: true, alpha: 0.2 });
+  gridGraphics.stroke({ color: config.gridColor, pixelLine: true, alpha: 0.2 });
   gridGraphics.visible = false;
 
   return gridGraphics;
@@ -223,7 +223,10 @@ async function init(): Promise<void> {
   const gridLines = createGridLines(grid);
   birbScene.addChild(gridLines);
 
-  const birbTexture: Texture = createBirbTexture(app.renderer);
+  const birbTexture: Texture = createBirbTexture(
+    app.renderer,
+    config.birbColor
+  );
 
   const birbContainer = createBirbContainer();
   birbScene.addChild(birbContainer);
