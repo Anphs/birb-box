@@ -44,16 +44,16 @@ export const config = {
   separationFactor: parseParam.float("separationFactor", 0.2),
 
   /** Simulation world color. */
-  worldColor: 0x000000,
+  worldColor: 0xffffff,
 
   /** Background world color */
   backgroundColor: 0x222222,
 
   /** Fill color to draw birbs. */
-  birbColor: 0xffffff,
+  birbColor: 0x000000,
 
   /** Grid line colors. */
-  gridColor: 0xffffff,
+  gridColor: 0x000000,
 };
 
 /** Camera behavior constants */
